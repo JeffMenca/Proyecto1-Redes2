@@ -2,16 +2,64 @@
 
 # Variables
 ACTION=$1  # "block" o "allow"
-DOMAIN=$2  # Dominio a bloquear o permitir
-MAC=$3     # Dirección MAC
+DOMAIN=$2  # Dominio a bloquear o permitir (opcional)
+MAC=$3     # Dirección MAC a bloquear o permitir (opcional)
+
+# Función para resolver las IPs del dominio (IPv4 e IPv6)
+resolve_domain_ips() {
+    IPS=$(nslookup $DOMAIN | awk '/^Address: / {print $2}' | grep -v '#')
+    echo $IPS
+}
+
+# Función para configurar iptables e ip6tables para bloquear o permitir una dirección IP
+configure_ip() {
+    IPS=$(resolve_domain_ips)
+
+    if [ -z "$IPS" ]; then
+        echo "No se pudo resolver la IP para el dominio $DOMAIN"
+        exit 1
+    fi
+
+    for IP in $IPS; do
+        if [[ $IP == *:* ]]; then
+            # Es una dirección IPv6
+            if [ "$ACTION" == "block" ]; then
+                sudo ip6tables -A OUTPUT -d $IP -j DROP
+                sudo ip6tables -A INPUT -s $IP -j DROP
+                echo "Dominio $DOMAIN (IPv6: $IP) bloqueado."
+            elif [ "$ACTION" == "allow" ]; then
+                sudo ip6tables -D OUTPUT -d $IP -j DROP
+                sudo ip6tables -D INPUT -s $IP -j DROP
+                echo "Dominio $DOMAIN (IPv6: $IP) permitido."
+            else
+                echo "Acción no reconocida: usa 'block' o 'allow'"
+                exit 1
+            fi
+        else
+            # Es una dirección IPv4
+            if [ "$ACTION" == "block" ]; then
+                sudo iptables -A OUTPUT -d $IP -j DROP
+                sudo iptables -A INPUT -s $IP -j DROP
+                echo "Dominio $DOMAIN (IPv4: $IP) bloqueado."
+            elif [ "$ACTION" == "allow" ]; then
+                sudo iptables -D OUTPUT -d $IP -j DROP
+                sudo iptables -D INPUT -s $IP -j DROP
+                echo "Dominio $DOMAIN (IPv4: $IP) permitido."
+            else
+                echo "Acción no reconocida: usa 'block' o 'allow'"
+                exit 1
+            fi
+        fi
+    done
+}
 
 # Función para configurar iptables para bloquear o permitir una MAC address
 configure_mac() {
     if [ "$ACTION" == "block" ]; then
-        iptables -A INPUT -m mac --mac-source $MAC -j DROP
+        sudo iptables -A INPUT -m mac --mac-source $MAC -j DROP
         echo "MAC $MAC bloqueada."
     elif [ "$ACTION" == "allow" ]; then
-        iptables -A INPUT -m mac --mac-source $MAC -j ACCEPT
+        sudo iptables -D INPUT -m mac --mac-source $MAC -j DROP
         echo "MAC $MAC permitida."
     else
         echo "Acción no reconocida: usa 'block' o 'allow'"
@@ -19,44 +67,16 @@ configure_mac() {
     fi
 }
 
-# Función para configurar Squid para bloquear o permitir un dominio
-configure_domain() {
-    if [ "$ACTION" == "block" ]; then
-        if ! grep -q "$DOMAIN" /etc/squid/baddomains; then
-            echo "$DOMAIN" >> /etc/squid/baddomains
-            echo "Dominio $DOMAIN añadido a la lista de bloqueados."
-        fi
-        if ! grep -q 'acl bad_domains dstdomain "/etc/squid/baddomains"' /etc/squid/squid.conf; then
-            echo 'acl bad_domains dstdomain "/etc/squid/baddomains"' >> /etc/squid/squid.conf
-            echo 'http_access deny bad_domains' >> /etc/squid/squid.conf
-        fi
-    elif [ "$ACTION" == "allow" ]; then
-        if ! grep -q "$DOMAIN" /etc/squid/gooddomains; then
-            echo "$DOMAIN" >> /etc/squid/gooddomains
-            echo "Dominio $DOMAIN añadido a la lista de permitidos."
-        fi
-        if ! grep -q 'acl good_domains dstdomain "/etc/squid/gooddomains"' /etc/squid/squid.conf; then
-            echo 'acl good_domains dstdomain "/etc/squid/gooddomains"' >> /etc/squid/squid.conf
-            echo 'http_access allow good_domains' >> /etc/squid/squid.conf
-        fi
-    else
-        echo "Acción no reconocida: usa 'block' o 'allow'"
-        exit 1
-    fi
+# Configurar IP del dominio (si se proporciona)
+if [ -n "$DOMAIN" ]; then
+    configure_ip
+fi
 
-    # Reiniciar Squid para aplicar cambios
-    systemctl restart squid
-}
-
-# Configurar MAC
+# Configurar MAC (si se proporciona)
 if [ -n "$MAC" ]; then
     configure_mac
 fi
 
-# Configurar dominio
-if [ -n "$DOMAIN" ]; then
-    configure_domain
-fi
-
-# Guardar las reglas de iptables
-iptables-save > /etc/iptables/rules.v4
+# Guardar las reglas de iptables y ip6tables
+sudo iptables-save > /etc/iptables/rules.v4
+sudo ip6tables-save > /etc/iptables/rules.v6
