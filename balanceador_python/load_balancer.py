@@ -32,7 +32,7 @@ netmask_private_network = "24"
 # To confing the vias to the load balancer we need to remmove the default conf in /etc/nftables.conf with sudo permissions
 # Add PORTS, IPs, and NETMASKS to the configuration template
 custom_data_file = data_file.replace("$INTERFACE_ISP1", interface_isp1).replace(
-    "$INTERFACE_ISP2", interface_isp2).replace("$PRIVATE_NETWORK", f'${private_network}/{netmask_private_network}')
+    "$INTERFACE_ISP2", interface_isp2).replace("$PRIVATE_NETWORK", f'{private_network}/{netmask_private_network}')
 
 # Write the configuration to the file /etc/nftables.conf
 with open("/etc/nftables.conf", "w") as file:

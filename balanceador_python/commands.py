@@ -1,6 +1,6 @@
 command1 = "iptables -t nat -F POSTROUTING"
 command2 = "iptables -t nat -A POSTROUTING -o $VALUE1 -j MASQUERADE"
-command4 = "sudo systemctl restart network.service"
+command4 = "sudo systemctl restart networking.service"
 command5 = "sudo iptables -F FORWARD"
 
 command6 = "sudo iptables -A FORWARD -i $VALUE1 -o $VALUE2 -j ACCEPT"
