@@ -27,6 +27,8 @@ netmask_isp2 = "24"
 # Private network firewall - client
 private_network = "192.168.45.0"
 netmask_private_network = "24"
+# Return route to the firewall - client
+ip_firewall = "11.11.11.1"
 # Comand list to configure vias to the load balancer
 
 # To confing the vias to the load balancer we need to remmove the default conf in /etc/nftables.conf with sudo permissions
@@ -76,3 +78,6 @@ execute_command(COMMANDS.command8.replace(
 execute_command(COMMANDS.command9.replace(
     "$VALUE1", ip_isp1).replace("$VALUE2", interface_isp1).replace(
     "$VALUE3", "2").replace("$VALUE4", ip_isp2).replace("$VALUE5", interface_isp2).replace("$VALUE6", "2"))
+# Run command11 - Add route to the firewall
+execute_command(COMMANDS.command11.replace(
+    "$VALUE1", f'{private_network}/{private_network}').replace("$VALUE2", ip_firewall).replace("$VALUE3", interface_bc_firewall))
