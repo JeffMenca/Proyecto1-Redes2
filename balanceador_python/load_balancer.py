@@ -80,4 +80,4 @@ execute_command(COMMANDS.command9.replace(
     "$VALUE3", "2").replace("$VALUE4", ip_isp2).replace("$VALUE5", interface_isp2).replace("$VALUE6", "2"))
 # Run command11 - Add route to the firewall
 execute_command(COMMANDS.command11.replace(
-    "$VALUE1", f'{private_network}/{private_network}').replace("$VALUE2", ip_firewall).replace("$VALUE3", interface_bc_firewall))
+    "$VALUE1", f'{private_network}/{netmask_private_network}').replace("$VALUE2", ip_firewall).replace("$VALUE3", interface_bc_firewall))
