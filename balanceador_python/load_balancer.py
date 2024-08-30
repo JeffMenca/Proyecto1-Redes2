@@ -24,9 +24,12 @@ ip_isp2 = "192.168.20.1"
 # Netmask of the IPs of ISP1 and ISP2
 netmask_isp1 = "30"
 netmask_isp2 = "30"
-# Private network firewall - client
+# Private network firewall - server zabix
 private_network = "18.18.18.0"
 netmask_private_network = "30"
+# Private network firewall - client
+private_network_client = "192.168.20.0"
+netmask_private_network_client = "24"
 # Return route to the firewall - client
 ip_firewall = "17.17.17.1"
 # Comand list to configure vias to the load balancer
@@ -81,3 +84,6 @@ execute_command(COMMANDS.command9.replace(
 # Run command11 - Add route to the firewall
 execute_command(COMMANDS.command11.replace(
     "$VALUE1", f'{private_network}/{netmask_private_network}').replace("$VALUE2", ip_firewall).replace("$VALUE3", interface_bc_firewall))
+# Run command11 - Add route to the client
+execute_command(COMMANDS.command11.replace(
+    "$VALUE1", f'{private_network_client}/{netmask_private_network_client}').replace("$VALUE2", ip_firewall).replace("$VALUE3", interface_bc_firewall))

@@ -65,7 +65,7 @@ sudo ip route del default via 192.168.25.1 dev enp8s0
 
 # Agregar default via para ambas interfaces (enp7s0 y enp8s0) hacia ISP1 y ISP2
 # sudo ip route add default nexthop via 192.168.20.1 dev enp7s0 weight 2 nexthop via 192.168.25.1 dev enp8s0 weight 2
-sudo ip route add default scope global nexthop via 192.168.20.1 dev enp7s0 weight 2 nexthop via 192.168.25.1 dev enp8s0 weight 2
+sudo ip route add default scope global nexthop via 192.168.20.1 dev enp7s0 weight 1 nexthop via 192.168.25.1 dev enp8s0 weight 1
 
 # Verificacion de las tablas y enrutamiento de red
 ip route
