@@ -19,16 +19,16 @@ interface_isp1 = "enp7s0"
 interface_isp2 = "enp8s0"
 interface_bc_firewall = "enp9s0"
 # IPs of ISP1 and ISP2
-ip_isp1 = "192.168.20.1"
-ip_isp2 = "192.168.25.1"
+ip_isp1 = "192.168.10.1"
+ip_isp2 = "192.168.20.1"
 # Netmask of the IPs of ISP1 and ISP2
-netmask_isp1 = "24"
-netmask_isp2 = "24"
+netmask_isp1 = "30"
+netmask_isp2 = "30"
 # Private network firewall - client
-private_network = "192.168.45.0"
-netmask_private_network = "24"
+private_network = "18.18.18.0"
+netmask_private_network = "30"
 # Return route to the firewall - client
-ip_firewall = "11.11.11.1"
+ip_firewall = "17.17.17.1"
 # Comand list to configure vias to the load balancer
 
 # To confing the vias to the load balancer we need to remmove the default conf in /etc/nftables.conf with sudo permissions
